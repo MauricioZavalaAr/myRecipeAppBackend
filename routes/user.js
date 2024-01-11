@@ -72,7 +72,11 @@ router.post('/login', async (req, res) => {
     // Create JWT token
     const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '1h' });
 
-    res.status(200).json({ token });
+    res.status(200).json({ token,
+      user: {
+        username: user.username, // send back the username
+        email: user.email // optionally include other user details
+      }});
   } catch (error) {
     console.error(error); // Log the error for server-side inspection
     res.status(500).json({ message: 'Error registering new user' });
