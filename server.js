@@ -6,16 +6,20 @@ const recipeRoutes = require('./routes/recipes');
 const userRoutes = require('./routes/user');
 require('dotenv').config();
 
-
-
 const app = express();
 
-app.use(cors());
+// Configure CORS to allow requests from your frontend domain
+app.use(cors({
+  origin: 'exp://192.168.0.18:8081', // Replace with your frontend's URL
+  methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+  credentials: true,
+  optionsSuccessStatus: 204
+}));
+
 app.use(express.json()); // for parsing application/json
 
 app.use('/user', userRoutes);
 app.use('/recipes', recipeRoutes);
-
 
 // MongoDB connection
 mongoose.connect(process.env.MONGO_URI)
