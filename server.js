@@ -1,20 +1,11 @@
 const express = require('express');
 const mongoose = require('mongoose');
-const cors = require('cors');
 
 const recipeRoutes = require('./routes/recipes');
 const userRoutes = require('./routes/user');
 require('dotenv').config();
 
 const app = express();
-
-// Configure CORS to allow requests from your frontend domain
-app.use(cors({
-  origin: 'http://localhost:19006', // Replace with your frontend's URL
-  methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
-  credentials: true,
-  optionsSuccessStatus: 204
-}));
 
 app.use(express.json()); // for parsing application/json
 
