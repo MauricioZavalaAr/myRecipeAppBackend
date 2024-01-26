@@ -11,14 +11,30 @@ const app = express();
 // Enable CORS for all origins
 app.use(cors());
 
-app.use(express.json()); // for parsing application/json
+// Custom CORS Middleware
+app.use((req, res, next) => {
+  res.header('Access-Control-Allow-Origin', '*'); // Permite cualquier origen
+  res.header(
+    'Access-Control-Allow-Headers',
+    'Origin, X-Requested-With, Content-Type, Accept, Authorization'
+  );
+  if (req.method === 'OPTIONS') {
+    res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, PATCH, DELETE');
+    res.status(200).json({});
+  } else {
+    next();
+  }
+});
+
+app.use(express.json()); // For parsing application/json
 
 // Routes
 app.use('/user', userRoutes);
 app.use('/recipes', recipeRoutes);
 
 // MongoDB connection
-mongoose.connect(process.env.MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true })
+mongoose
+  .connect(process.env.MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true })
   .then(() => console.log('Successfully connected to MongoDB'))
   .catch(err => console.error('Error connecting to MongoDB:', err));
 
