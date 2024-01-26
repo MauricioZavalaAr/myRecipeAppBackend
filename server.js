@@ -1,11 +1,19 @@
 const express = require('express');
 const mongoose = require('mongoose');
+const cors = require('cors'); // Make sure you have installed the CORS package
 
 const recipeRoutes = require('./routes/recipes');
 const userRoutes = require('./routes/user');
 require('dotenv').config();
 
 const app = express();
+
+// Enable CORS for all origins
+app.use(cors({
+  origin: '*', // Allows all origins
+  methods: ['GET', 'POST', 'DELETE', 'UPDATE', 'PUT', 'PATCH'], // Allows these methods
+  credentials: true // Allows credentials (cookies, authorization headers, etc.)
+}));
 
 app.use(express.json()); // for parsing application/json
 
@@ -19,7 +27,7 @@ mongoose.connect(process.env.MONGO_URI)
 
 // Error handling middleware
 app.use((err, req, res, next) => {
-  console.error(err);
+  console.error(err.stack);
   res.status(500).send('An error occurred!');
 });
 
