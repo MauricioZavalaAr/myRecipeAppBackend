@@ -82,5 +82,37 @@ router.post('/login', async (req, res) => {
     res.status(500).json({ message: 'Error registering new user' });
   }
 });
+router.post('/update', async (req, res) => {
+  try {
+    const { userId, currentPassword, newPassword, confirmNewPassword, newName } = req.body;
 
+    if (newPassword !== confirmNewPassword) {
+      return res.status(400).json({ message: 'New passwords do not match.' });
+    }
+
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ message: 'User not found.' });
+    }
+
+    const isMatch = await bcrypt.compare(currentPassword, user.password);
+    if (!isMatch) {
+      return res.status(401).json({ message: 'Current password is incorrect.' });
+    }
+
+    if (newName && newName !== user.username) {
+      user.username = newName;
+    }
+
+    if (newPassword && newPassword !== currentPassword) {
+      user.password = await bcrypt.hash(newPassword, 12);
+    }
+
+    await user.save();
+    res.status(200).json({ message: 'User updated successfully.' });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Error updating user.' });
+  }
+});
 module.exports = router;
