@@ -86,26 +86,26 @@ router.post('/update', async (req, res) => {
   try {
     const { userId, currentPassword, newPassword, confirmNewPassword, newName } = req.body;
 
-    if (newPassword !== confirmNewPassword) {
-      return res.status(400).json({ message: 'New passwords do not match.' });
-    }
-
     const user = await User.findById(userId);
     if (!user) {
       return res.status(404).json({ message: 'User not found.' });
     }
 
-    const isMatch = await bcrypt.compare(currentPassword, user.password);
-    if (!isMatch) {
-      return res.status(401).json({ message: 'Current password is incorrect.' });
+    // Cambio de contraseña
+    if (currentPassword && newPassword && confirmNewPassword) {
+      if (newPassword !== confirmNewPassword) {
+        return res.status(400).json({ message: 'New passwords do not match.' });
+      }
+      const isMatch = await bcrypt.compare(currentPassword, user.password);
+      if (!isMatch) {
+        return res.status(401).json({ message: 'Current password is incorrect.' });
+      }
+      user.password = await bcrypt.hash(newPassword, 12);
     }
-
+    
+    // Cambio de nombre de usuario
     if (newName && newName !== user.username) {
       user.username = newName;
-    }
-
-    if (newPassword && newPassword !== currentPassword) {
-      user.password = await bcrypt.hash(newPassword, 12);
     }
 
     await user.save();
