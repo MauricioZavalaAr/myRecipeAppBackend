@@ -139,15 +139,38 @@ router.patch('/favorites', async (req, res) => {
 router.get('/favorites/:userId', async (req, res) => {
   try {
     const { userId } = req.params;
-    const user = await User.findById(userId).populate('favoriteRecipes');
+    const user = await User.findById(userId).populate('favorites'); // Cambiado de 'favoriteRecipes' a 'favorites'
     if (!user) {
       return res.status(404).json({ message: 'User not found.' });
     }
     
-    res.status(200).json(user.favoriteRecipes);
+    res.status(200).json(user.favorites);
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: 'Error fetching favorite recipes.' });
+  }
+});
+
+router.put('/add-favorite/:userId', async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const { recipeId } = req.body;
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ message: 'User not found.' });
+    }
+
+    // Añadir receta a los favoritos si no está ya en la lista
+    if (!user.favorites.includes(recipeId)) {
+      user.favorites.push(recipeId);
+      await user.save();
+      res.status(200).json({ message: 'Recipe added to favorites' });
+    } else {
+      res.status(400).json({ message: 'Recipe is already in favorites' });
+    }
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Error updating favorites' });
   }
 });
 
