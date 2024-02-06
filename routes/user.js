@@ -71,11 +71,12 @@ router.post('/login', async (req, res) => {
 
     // Create JWT token
     const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '1h' });
-
-    res.status(200).json({ token,
+    res.status(200).json({
+      token,
       user: {
-        username: user.username, // send back the username
-        email: user.email // optionally include other user details
+        _id: user._id, // Include _id in the response
+        username: user.username,
+        email: user.email// optionally include other user details
       }});
   } catch (error) {
     console.error(error); // Log the error for server-side inspection
