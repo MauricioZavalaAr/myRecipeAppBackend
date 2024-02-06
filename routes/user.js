@@ -154,6 +154,8 @@ router.get('/favorites/:userId', async (req, res) => {
 
 router.put('/add-favorite/:userId', async (req, res) => {
   try {
+    console.log(req.params.userId); // Imprime el userId
+    console.log(req.body.recipeId); // Imprime el recipeId
     const { userId } = req.params;
     const { recipeId } = req.body;
     const user = await User.findById(userId);
