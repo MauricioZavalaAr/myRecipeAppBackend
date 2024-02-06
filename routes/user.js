@@ -174,5 +174,24 @@ router.put('/add-favorite/:userId', async (req, res) => {
   }
 });
 
+router.put('/remove-favorite/:userId', async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const { recipeId } = req.body;
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ message: 'User not found.' });
+    }
+
+    // Remove the recipe from the user's favorites
+    user.favorites = user.favorites.filter((favorite) => favorite.toString() !== recipeId);
+    await user.save();
+    res.status(200).json({ message: 'Favorite recipe removed successfully.', favorites: user.favorites });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Error removing favorite recipe.' });
+  }
+});
+
 
 module.exports = router;
