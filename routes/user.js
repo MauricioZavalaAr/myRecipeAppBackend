@@ -117,7 +117,8 @@ router.post('/update', async (req, res) => {
   }
 });
 
-// Ruta para actualizar las recetas favoritas de un usuario
+const ObjectId = mongoose.Types.ObjectId;
+
 router.patch('/favorites', async (req, res) => {
   try {
     const { userId, favoriteRecipes } = req.body;
@@ -126,8 +127,8 @@ router.patch('/favorites', async (req, res) => {
       return res.status(404).json({ message: 'User not found.' });
     }
 
-    // Actualizar las recetas favoritas
-    user.favoriteRecipes = favoriteRecipes;
+    // Asegúrate de que todos los IDs de las recetas sean convertidos a ObjectId
+    user.favorites = favoriteRecipes.map(id => ObjectId(id));
     await user.save();
     res.status(200).json({ message: 'Favorite recipes updated successfully.' });
   } catch (error) {
@@ -136,16 +137,17 @@ router.patch('/favorites', async (req, res) => {
   }
 });
 
-// Ruta para obtener las recetas favoritas de un usuario
 router.get('/favorites/:userId', async (req, res) => {
   try {
     const { userId } = req.params;
-    const user = await User.findById(userId).populate('favorites'); // Cambiado de 'favoriteRecipes' a 'favorites'
+    const user = await User.findById(userId).populate('favorites');
     if (!user) {
       return res.status(404).json({ message: 'User not found.' });
     }
     
-    res.status(200).json(user.favorites);
+    // Convertir los ObjectId a strings antes de enviarlos
+    const favorites = user.favorites.map(fav => fav._id.toString());
+    res.status(200).json(favorites);
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: 'Error fetching favorite recipes.' });
@@ -154,26 +156,25 @@ router.get('/favorites/:userId', async (req, res) => {
 
 router.put('/add-favorite/:userId', async (req, res) => {
   try {
-    console.log(req.params.userId); // Imprime el userId
-    console.log(req.body.recipeId); // Imprime el recipeId
     const { userId } = req.params;
     const { recipeId } = req.body;
     const user = await User.findById(userId);
+
     if (!user) {
       return res.status(404).json({ message: 'User not found.' });
     }
 
-    // Añadir receta a los favoritos si no está ya en la lista
-    if (!user.favorites.includes(recipeId)) {
-      user.favorites.push(recipeId);
+    // Convierte el array de ObjectIds a un array de strings y verifica si recipeId ya está
+    if (!user.favorites.map(fav => fav.toString()).includes(recipeId)) {
+      user.favorites.push(recipeId); // Asume que recipeId ya es un string
       await user.save();
-      res.status(200).json({ message: 'Recipe added to favorites' });
+      res.status(200).json({ message: 'Recipe added to favorites.' });
     } else {
-      res.status(400).json({ message: 'Recipe is already in favorites' });
+      res.status(400).json({ message: 'Recipe is already in favorites.' });
     }
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: 'Error updating favorites' });
+    res.status(500).json({ message: 'Error updating favorites.' });
   }
 });
 
@@ -182,14 +183,15 @@ router.put('/remove-favorite/:userId', async (req, res) => {
     const { userId } = req.params;
     const { recipeId } = req.body;
     const user = await User.findById(userId);
+
     if (!user) {
       return res.status(404).json({ message: 'User not found.' });
     }
 
-    // Remove the recipe from the user's favorites
-    user.favorites = user.favorites.filter((favorite) => favorite.toString() !== recipeId);
+    // Convierte el array de ObjectIds a un array de strings y filtra el recipeId
+    user.favorites = user.favorites.filter(fav => fav.toString() !== recipeId);
     await user.save();
-    res.status(200).json({ message: 'Favorite recipe removed successfully.', favorites: user.favorites });
+    res.status(200).json({ message: 'Favorite recipe removed successfully.' });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: 'Error removing favorite recipe.' });
