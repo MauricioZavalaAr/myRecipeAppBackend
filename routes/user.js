@@ -159,6 +159,8 @@ router.put('/add-favorite/:userId', async (req, res) => {
   try {
     const { userId } = req.params;
     const { recipeId } = req.body;
+    console.log(`Adding favorite for user: ${userId} with recipeId: ${recipeId}`);
+
     const user = await User.findById(userId);
 
     if (!user) {
