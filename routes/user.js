@@ -176,8 +176,8 @@ router.put('/add-favorite/:userId', async (req, res) => {
       res.status(400).json({ message: 'Recipe is already in favorites.' });
     }
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: 'Error updating favorites.' });
+    console.error('Error in /add-favorite/:userId:', err);
+    res.status(500).send({ error: 'An error occurred while trying to add the favorite.' });
   }
 });
 
