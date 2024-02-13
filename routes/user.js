@@ -155,27 +155,21 @@ router.get('/favorites/:userId', async (req, res) => {
   }
 });
 
-const Recipe = require('../models/Recipe'); // Asegúrate de importar el modelo de receta
-
 router.put('/add-favorite/:userId', async (req, res) => {
   try {
     const { userId } = req.params;
     const { recipeId } = req.body;
+    console.log(`Adding favorite for user: ${userId} with recipeId: ${recipeId}`);
 
-    // Verificar si la receta existe
-    const recipeExists = await Recipe.findById(recipeId);
-    if (!recipeExists) {
-      return res.status(404).json({ message: 'Recipe not found.' });
-    }
-
-    // Verificar si el usuario existe y proceder con la lógica existente
     const user = await User.findById(userId);
+
     if (!user) {
       return res.status(404).json({ message: 'User not found.' });
     }
 
+    // Convierte el array de ObjectIds a un array de strings y verifica si recipeId ya está
     if (!user.favorites.map(fav => fav.toString()).includes(recipeId)) {
-      user.favorites.push(recipeId);
+      user.favorites.push(recipeId); // Asume que recipeId ya es un string
       await user.save();
       res.status(200).json({ message: 'Recipe added to favorites.' });
     } else {
