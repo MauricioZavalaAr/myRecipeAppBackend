@@ -139,6 +139,7 @@ router.patch('/favorites', async (req, res) => {
 });
 
 router.get('/favorites/:userId', async (req, res) => {
+  console.log(`Attempting to add favorite. UserID: ${req.params.userId}, RecipeID: ${req.body.recipeId}`);
   try {
     const { userId } = req.params;
     const user = await User.findById(userId).populate('favorites');
