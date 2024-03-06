@@ -168,9 +168,9 @@ router.put('/add-favorite/:userId', async (req, res) => {
     if (!user) {
       return res.status(404).json({ message: 'User not found.' });
     }
-
+    //=> fav.toString()
     // Convierte el array de ObjectIds a un array de strings y verifica si recipeId ya está
-    if (!user.favorites.map(fav => fav.toString()).includes(recipeId)) {
+    if (!user.favorites.map(fav).includes(recipeId)) {
       user.favorites.push(recipeId); // Asume que recipeId ya es un string
       await user.save();
       res.status(200).json({ message: 'Recipe added to favorites.' });
