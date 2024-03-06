@@ -179,7 +179,7 @@ router.put('/add-favorite/:userId', async (req, res) => {
     }
   } catch (error) {
     console.error(error); // Log the error for server-side inspection
-    res.status(500).json({ message: 'Error adding favorite' });  }
+    res.status(500).json({ message: 'Error adding favorite back end' });  }
 });
 
 router.put('/remove-favorite/:userId', async (req, res) => {
