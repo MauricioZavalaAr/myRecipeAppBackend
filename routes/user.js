@@ -159,30 +159,20 @@ router.get('/favorites/:userId', async (req, res) => {
 router.put('/add-favorite/:userId', async (req, res) => {
   const { userId } = req.params;
   const { recipeId } = req.body;
-
   try {
       const user = await User.findById(userId);
       if (!user) {
-          return res.status(404).json({ message: 'User not found.' });
+          return res.status(404).json({ message: 'User not found' });
       }
-
-      // Verifica si la receta existe
-      const recipeExists = await Recipe.findById(recipeId); // Asume que tienes un modelo `Recipe`
-      if (!recipeExists) {
-          return res.status(404).json({ message: 'Recipe not found.' });
+      const recipeObjectId = mongoose.Types.ObjectId(recipeId); // Convertir a ObjectId
+      if (user.favorites.some(favorite => favorite.equals(recipeObjectId))) {
+          return res.status(400).json({ message: 'Recipe is already in favorites' });
       }
-
-      // Convierte el recipeId a ObjectId y verifica si ya está en favoritos
-      const recipeObjectId = mongoose.Types.ObjectId(recipeId);
-      if (!user.favorites.some(favorite => favorite.equals(recipeObjectId))) {
-          user.favorites.push(recipeObjectId);
-          await user.save();
-          res.status(200).json({ message: 'Recipe added to favorites' });
-      } else {
-          res.status(400).json({ message: 'Recipe is already in favorites' });
-      }
+      user.favorites.push(recipeObjectId);
+      await user.save();
+      res.status(200).json({ message: 'Recipe added to favorites successfully' });
   } catch (error) {
-      console.error(error);
+      console.error('Error adding favorite:', error);
       res.status(500).json({ message: 'Error adding favorite' });
   }
 });
