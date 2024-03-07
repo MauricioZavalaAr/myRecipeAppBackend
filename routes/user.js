@@ -160,33 +160,30 @@ router.put('/add-favorite/:userId', async (req, res) => {
   const { userId } = req.params;
   const { recipeId } = req.body;
 
-  console.log(`Intentando agregar a favoritos para el usuario: ${userId} con recipeId: ${recipeId}`);
-
-  if (!userId || !recipeId) {
-    return res.status(400).json({ message: 'Faltan userId o recipeId en la solicitud.' });
-  }
-
   try {
-    const user = await User.findById(userId);
+      const user = await User.findById(userId);
+      if (!user) {
+          return res.status(404).json({ message: 'User not found.' });
+      }
 
-    if (!user) {
-      return res.status(404).json({ message: 'Usuario no encontrado.' });
-    }
+      // Verifica si la receta existe
+      const recipeExists = await Recipe.findById(recipeId); // Asume que tienes un modelo `Recipe`
+      if (!recipeExists) {
+          return res.status(404).json({ message: 'Recipe not found.' });
+      }
 
-    // Verifica si recipeId ya está en favoritos
-    if (user.favorites.includes(recipeId)) {
-      return res.status(400).json({ message: 'La receta ya está en favoritos.' });
-    }
-
-    // Agrega la receta a favoritos y guarda el usuario
-    user.favorites.push(recipeId);
-    await user.save();
-
-    return res.status(200).json({ message: 'Receta agregada a favoritos exitosamente.' });
+      // Convierte el recipeId a ObjectId y verifica si ya está en favoritos
+      const recipeObjectId = mongoose.Types.ObjectId(recipeId);
+      if (!user.favorites.some(favorite => favorite.equals(recipeObjectId))) {
+          user.favorites.push(recipeObjectId);
+          await user.save();
+          res.status(200).json({ message: 'Recipe added to favorites' });
+      } else {
+          res.status(400).json({ message: 'Recipe is already in favorites' });
+      }
   } catch (error) {
-    console.error('Error al agregar a favoritos en el backend:', error);
-    // Puedes querer enviar detalles más específicos dependiendo de tu política de manejo de errores
-    return res.status(500).json({ message: 'Error interno del servidor.' });
+      console.error(error);
+      res.status(500).json({ message: 'Error adding favorite' });
   }
 });
 
