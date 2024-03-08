@@ -156,7 +156,7 @@ router.get('/favorites/:userId', async (req, res) => {
   }
 });
 
-router.put('/add-favorite/:userId', async (req, res) => {
+router.post('/add-favorite/:userId', async (req, res) => {
   const { userId } = req.params;
   const { recipeId } = req.body;
 
