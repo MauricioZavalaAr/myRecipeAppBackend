@@ -158,27 +158,38 @@ router.get('/favorites/:userId', async (req, res) => {
 
 router.put('/add-favorite/:userId', async (req, res) => {
   const { userId } = req.params;
-  const { recipeTitle } = req.body; // Using title instead of ID
+  const { recipeId } = req.body;
 
   try {
+    // Check if userId and recipeId are valid ObjectIds
+    if (!mongoose.Types.ObjectId.isValid(userId) || !mongoose.Types.ObjectId.isValid(recipeId)) {
+      return res.status(400).json({ message: 'Invalid userId or recipeId' });
+    }
+
+    // Fetch the user from the database
     const user = await User.findById(userId);
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
     }
 
-    // Check if the recipe title is already in the user's favorites
-    if (user.favorites.includes(recipeTitle)) {
+    // Convert recipeId to ObjectId
+    const recipeObjectId = mongoose.Types.ObjectId(recipeId);
+
+    // Check if the recipe is already in the user's favorites
+    if (user.favorites.some(favorite => favorite.equals(recipeObjectId))) {
       return res.status(400).json({ message: 'Recipe is already in favorites' });
     }
 
-    // Add the recipe title to the user's favorites
-    user.favorites.push(recipeTitle);
+    // Add the recipe to the user's favorites
+    user.favorites.push(recipeObjectId);
     await user.save();
 
     res.status(200).json({ message: 'Recipe added to favorites successfully' });
   } catch (error) {
+    // Log the full error to the console for debugging
     console.error('Error adding favorite:', error);
-    res.status(500).json({ message: 'Error adding favorite' });
+    // Send a detailed error message to the client
+    res.status(500).json({ message: `Error adding favorite: ${error.message}` });
   }
 });
 
