@@ -159,7 +159,7 @@ router.get('/favorites/:userId', async (req, res) => {
 router.post('/add-favorite/:userId', async (req, res) => {
   const { userId } = req.params;
   const { recipeId } = req.body;
-
+  console.log(`Attempting to add favorite. UserID: ${req.params.userId}, RecipeID: ${req.body.recipeId}`);
   try {
     // Check if userId and recipeId are valid ObjectIds
     if (!mongoose.Types.ObjectId.isValid(userId) || !mongoose.Types.ObjectId.isValid(recipeId)) {
